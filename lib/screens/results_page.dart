@@ -69,12 +69,9 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
     final winnerIndex = widget.players.indexOf(winner);
 
     double calculateWinnerResult() {
-      final toReceive =
-          widget.players.length * widget.playerMaal[winnerIndex]!.toDouble();
+      final toReceive = widget.playerMaal[winnerIndex]!.toDouble() * widget.players.length.toDouble();
       final toPay = totalMaal.toDouble();
-      final gt = toReceive - toPay +
-          (3 * (seenPlayers.length - 1).toDouble()) +
-          (10 * unseenPlayers.length.toDouble());
+      final gt = toReceive - toPay + (3 * (seenPlayers.length - 1).toDouble()) + (10 * unseenPlayers.length.toDouble());
       return gt * widget.katiPoint.toDouble();
     }
 
@@ -82,9 +79,8 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
       final results = <String, double>{};
       for (var i = 0; i < widget.players.length; i++) {
         if (widget.seenStatus[i] == 'Yes' && widget.players[i] != winner) {
-          final toReceive = widget.playerMaal[i]!.toDouble() *
-              widget.players.length.toDouble();
-          final toPay = totalMaal.toDouble() + 3.0;
+          final toReceive = widget.playerMaal[i]!.toDouble() * widget.players.length.toDouble();
+          final toPay = totalMaal.toDouble() + 3.0;  
           final gt = toReceive - toPay;
           results[widget.players[i]] = gt * widget.katiPoint.toDouble();
         }
@@ -96,7 +92,7 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
       final results = <String, double>{};
       for (var i = 0; i < widget.players.length; i++) {
         if (widget.seenStatus[i] == 'No') {
-          final toPay = totalMaal.toDouble() + 10.0;
+          final toPay = totalMaal.toDouble() + 10.0;  
           final gt = -toPay;
           results[widget.players[i]] = gt * widget.katiPoint.toDouble();
         }
@@ -131,7 +127,7 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
                     opacity: _animation,
                     child: _buildSectionTitle(context, 'Seen Players Results:', Colors.black),
                   ),
-                  ...seenResults.entries.take(4).map((entry) =>
+                  ...seenResults.entries.map((entry) =>
                       FadeTransition(
                         opacity: _animation,
                         child: _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.blue),
@@ -141,7 +137,7 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
                     opacity: _animation,
                     child: _buildSectionTitle(context, 'Unseen Players Results:', Colors.black),
                   ),
-                  ...unseenResults.entries.take(4).map((entry) =>
+                  ...unseenResults.entries.map((entry) =>
                       FadeTransition(
                         opacity: _animation,
                         child: _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.red),
@@ -204,12 +200,12 @@ class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),  
         tileColor: color.withOpacity(0.1),
-        leading: Icon(Icons.star, color: color, size: 24),  
+        leading: Icon(Icons.star, color: color, size: 20),  
         title: Text(
           result,
           style: TextStyle(
             color: color,
-            fontSize: 16,  
+            fontSize: 14,  
             fontWeight: FontWeight.bold,
           ),
         ),
