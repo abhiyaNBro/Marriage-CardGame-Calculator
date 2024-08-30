@@ -67,7 +67,7 @@ class _EnterPointsPageState extends State<EnterPointsPage> {
               child: TextField(
                 controller: _katiPointController,
                 decoration: InputDecoration(
-                  labelText: 'How much Point game',
+                  labelText: 'Kati रु point?',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

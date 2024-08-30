@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Game Points Calculator',
+      title: 'Marriage Point Calculator',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         buttonTheme: ButtonThemeData(
@@ -21,3 +21,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+

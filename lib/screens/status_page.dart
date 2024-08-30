@@ -29,6 +29,15 @@ class _StatusPageState extends State<StatusPage> {
     _playerMaal = {for (var i = 0; i < widget.players.length; i++) i: 0};
   }
 
+  List<String> _getVisiblePlayers() {
+    return widget.players
+        .asMap()
+        .entries
+        .where((entry) => _seenStatus[entry.key] == 'Yes')
+        .map((entry) => entry.value)
+        .toList();
+  }
+
   void _navigateToResultsPage() {
     setState(() {
       _isLoading = true;
@@ -46,7 +55,11 @@ class _StatusPageState extends State<StatusPage> {
             selectedWinner: _selectedWinner,
           ),
         ),
-      );
+      ).then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
     });
   }
 
@@ -90,9 +103,9 @@ class _StatusPageState extends State<StatusPage> {
                           Text(
                             widget.players[index],
                             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              color: Colors.teal,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                  color: Colors.teal,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           Row(
                             children: [
@@ -159,32 +172,42 @@ class _StatusPageState extends State<StatusPage> {
             Text(
               'Select Winner:',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.teal,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.teal,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             SizedBox(height: 10),
             AnimatedContainer(
               duration: Duration(milliseconds: 300),
+              padding: EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 color: Colors.teal.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.teal, width: 1),
               ),
-              child: DropdownButton<String>(
-                value: _selectedWinner,
-                hint: Text('Choose winner'),
-                items: widget.players.map((player) {
-                  return DropdownMenuItem<String>(
-                    value: player,
-                    child: Text(player),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedWinner = value;
-                  });
-                },
-                underline: SizedBox(), // Removes the underline
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedWinner,
+                  hint: Text('Choose winner'),
+                  isExpanded: true,
+                  items: _getVisiblePlayers().map((player) {
+                    return DropdownMenuItem<String>(
+                      value: player,
+                      child: Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.teal),
+                          SizedBox(width: 10),
+                          Text(player),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedWinner = value;
+                    });
+                  },
+                ),
               ),
             ),
             SizedBox(height: 16.0),
@@ -192,16 +215,14 @@ class _StatusPageState extends State<StatusPage> {
               opacity: _isLoading ? 0.5 : 1.0,
               duration: Duration(milliseconds: 300),
               child: ElevatedButton(
-                onPressed: _navigateToResultsPage,
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Calculate Results'),
+                onPressed: _isLoading ? null : _navigateToResultsPage,
+                child: Text('Calculate Results'),
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.teal),
                   foregroundColor: WidgetStateProperty.all(Colors.white),
                   padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 15)),
                   textStyle: WidgetStateProperty.all(TextStyle(fontSize: 16)),
-                  minimumSize: WidgetStateProperty.all(Size(150, 0)), 
+                  minimumSize: WidgetStateProperty.all(Size(150, 0)),
                   shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   )),

@@ -51,7 +51,11 @@ class _EnterNamesPageState extends State<EnterNamesPage> {
             playerControllers: _playerControllers,
           ),
         ),
-      );
+      ).then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
     });
   }
 
@@ -80,20 +84,30 @@ class _EnterNamesPageState extends State<EnterNamesPage> {
                         color: Colors.teal.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: TextField(
-                        controller: _playerControllers[index],
-                        decoration: InputDecoration(
-                          labelText: 'Player ${index + 1}',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Icon(Icons.person, color: Colors.teal),
                           ),
-                          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _players[index] = value;
-                          });
-                        },
+                          Expanded(
+                            child: TextField(
+                              controller: _playerControllers[index],
+                              decoration: InputDecoration(
+                                labelText: 'Player ${index + 1}',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _players[index] = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -105,13 +119,13 @@ class _EnterNamesPageState extends State<EnterNamesPage> {
               opacity: _isLoading ? 0.5 : 1.0,
               duration: Duration(milliseconds: 300),
               child: ElevatedButton(
-                onPressed: _navigateToStatusPage,
+                onPressed: _isLoading ? null : _navigateToStatusPage,
                 child: _isLoading
                     ? CircularProgressIndicator(color: Colors.white)
                     : Text('Next'),
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Colors.teal), 
-                  foregroundColor: WidgetStateProperty.all(Colors.white), 
+                  backgroundColor: WidgetStateProperty.all(Colors.teal),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
                   padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 15)),
                   textStyle: WidgetStateProperty.all(TextStyle(fontSize: 16)),
                   shape: WidgetStateProperty.all(RoundedRectangleBorder(

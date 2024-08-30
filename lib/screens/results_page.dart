@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ResultsPage extends StatelessWidget {
+class ResultsPage extends StatefulWidget {
   final int katiPoint;
   final List<String> players;
   final Map<int, int> playerMaal;
@@ -16,18 +16,49 @@ class ResultsPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-   
-    final totalMaal = playerMaal.values.fold(0, (sum, value) => sum + value);
-    final seenPlayers = seenStatus.entries.where((entry) => entry.value == 'Yes').map((entry) => players[entry.key]).toList();
-    final unseenPlayers = seenStatus.entries.where((entry) => entry.value == 'No').map((entry) => players[entry.key]).toList();
+  _ResultsPageState createState() => _ResultsPageState();
+}
 
-    String? winner = selectedWinner;
+class _ResultsPageState extends State<ResultsPage> with TickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _startAnimationSequence();
+  }
+
+  void _startAnimationSequence() async {
+    await Future.delayed(Duration(milliseconds: 100));
+    _controller.forward();
+    await Future.delayed(Duration(milliseconds: 300));
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final totalMaal = widget.playerMaal.values.fold(0, (sum, value) => sum + value);
+    final seenPlayers = widget.seenStatus.entries
+        .where((entry) => entry.value == 'Yes')
+        .map((entry) => widget.players[entry.key])
+        .toList();
+    final unseenPlayers = widget.seenStatus.entries
+        .where((entry) => entry.value == 'No')
+        .map((entry) => widget.players[entry.key])
+        .toList();
+
+    String? winner = widget.selectedWinner;
     if (winner == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Results'),
-          backgroundColor: Colors.blue,
+          title: Text('Winner'),
+          backgroundColor: Colors.blueAccent,
         ),
         body: Center(
           child: Text('No winner selected.'),
@@ -35,24 +66,27 @@ class ResultsPage extends StatelessWidget {
       );
     }
 
-    final winnerIndex = players.indexOf(winner);
+    final winnerIndex = widget.players.indexOf(winner);
 
-   
     double calculateWinnerResult() {
-      final toReceive = players.length * playerMaal[winnerIndex]!.toDouble();
+      final toReceive =
+          widget.players.length * widget.playerMaal[winnerIndex]!.toDouble();
       final toPay = totalMaal.toDouble();
-      final gt = toReceive - toPay + (3 * (seenPlayers.length - 1).toDouble()) + (10 * unseenPlayers.length.toDouble());
-      return gt * katiPoint.toDouble();
+      final gt = toReceive - toPay +
+          (3 * (seenPlayers.length - 1).toDouble()) +
+          (10 * unseenPlayers.length.toDouble());
+      return gt * widget.katiPoint.toDouble();
     }
 
     Map<String, double> calculateSeenResults() {
       final results = <String, double>{};
-      for (var i = 0; i < players.length; i++) {
-        if (seenStatus[i] == 'Yes' && players[i] != winner) {
-          final toReceive = playerMaal[i]!.toDouble() * players.length.toDouble();
+      for (var i = 0; i < widget.players.length; i++) {
+        if (widget.seenStatus[i] == 'Yes' && widget.players[i] != winner) {
+          final toReceive = widget.playerMaal[i]!.toDouble() *
+              widget.players.length.toDouble();
           final toPay = totalMaal.toDouble() + 3.0;
           final gt = toReceive - toPay;
-          results[players[i]] = gt * katiPoint.toDouble();
+          results[widget.players[i]] = gt * widget.katiPoint.toDouble();
         }
       }
       return results;
@@ -60,11 +94,11 @@ class ResultsPage extends StatelessWidget {
 
     Map<String, double> calculateUnseenResults() {
       final results = <String, double>{};
-      for (var i = 0; i < players.length; i++) {
-        if (seenStatus[i] == 'No') {
+      for (var i = 0; i < widget.players.length; i++) {
+        if (widget.seenStatus[i] == 'No') {
           final toPay = totalMaal.toDouble() + 10.0;
           final gt = -toPay;
-          results[players[i]] = gt * katiPoint.toDouble();
+          results[widget.players[i]] = gt * widget.katiPoint.toDouble();
         }
       }
       return results;
@@ -76,42 +110,66 @@ class ResultsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results'),
-        backgroundColor: Colors.blue,
+        title: Text('Winner'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
           children: [
-            _buildSectionTitle(context, 'Results:', Colors.black),
-            _buildResultCard(
-              context,
-              '$winner: ${winnerResult.toStringAsFixed(2)}',
-              Colors.green,
-            ),
-            SizedBox(height: 16),
-            _buildSectionTitle(context, 'Seen Players Results:', Colors.black),
-            ...seenResults.entries.map((entry) =>
-              _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.blue)
-            ),
-            SizedBox(height: 16),
-            _buildSectionTitle(context, 'Unseen Players Results:', Colors.black),
-            ...unseenResults.entries.map((entry) =>
-              _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.red)
-            ),
-            SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.popUntil(context, ModalRoute.withName('/'));
-                },
-                child: Text('New Game?'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  textStyle: TextStyle(fontSize: 16),
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                ),
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildSectionTitle(context, 'Winner:', Colors.black),
+                  _buildResultCard(
+                    context,
+                    '$winner: ${winnerResult.toStringAsFixed(2)}',
+                    Colors.green,
+                  ),
+                  SizedBox(height: 16),
+                  FadeTransition(
+                    opacity: _animation,
+                    child: _buildSectionTitle(context, 'Seen Players Results:', Colors.black),
+                  ),
+                  ...seenResults.entries.take(4).map((entry) =>
+                      FadeTransition(
+                        opacity: _animation,
+                        child: _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.blue),
+                      )),
+                  SizedBox(height: 16),
+                  FadeTransition(
+                    opacity: _animation,
+                    child: _buildSectionTitle(context, 'Unseen Players Results:', Colors.black),
+                  ),
+                  ...unseenResults.entries.take(4).map((entry) =>
+                      FadeTransition(
+                        opacity: _animation,
+                        child: _buildResultCard(context, '${entry.key}: ${entry.value.toStringAsFixed(2)}', Colors.red),
+                      )),
+                ],
               ),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildActionButton(
+                  context,
+                  'New Game',
+                  Colors.blueAccent,
+                  () {
+                    Navigator.popUntil(context, ModalRoute.withName('/'));
+                  },
+                ),
+                _buildActionButton(
+                  context,
+                  'Replay',
+                  Colors.orange,
+                  () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -120,46 +178,58 @@ class ResultsPage extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title, Color color) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      padding: EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8), 
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(  
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
 
   Widget _buildResultCard(BuildContext context, String result, Color color) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      margin: EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
+    return Card(
+      elevation: 4,  
+      margin: EdgeInsets.symmetric(vertical: 4),  
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),  
       ),
-      child: Text(
-        result,
-        style: TextStyle(
-          color: color,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),  
+        tileColor: color.withOpacity(0.1),
+        leading: Icon(Icons.star, color: color, size: 24),  
+        title: Text(
+          result,
+          style: TextStyle(
+            color: color,
+            fontSize: 16,  
+            fontWeight: FontWeight.bold,
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, String label, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),  
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 6,
       ),
     );
   }
